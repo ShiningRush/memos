@@ -4,7 +4,13 @@ wrk是一个开源的http的压测工具，它封装了很多开源项目的，�
 同时还集成了`LuaJIT`，所以可以自己写Lua脚本，放在 `/scripts` 目录下。[点击这里](https://github.com/wg/wrk) 访问它的 Github。
 
 ## 安装
-
+在Github的Release中下载最新版解压即可。
+```
+wget https://github.com/wg/wrk/archive/4.1.0.tar.gz ./
+tar -xzvf ./4.1.0.tar.gz
+make
+```
+安装后自行选择是否是否将二进制文件放入`$PATH`中
 
 ## 基础用法
 ```bash
