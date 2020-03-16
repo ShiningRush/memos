@@ -65,7 +65,7 @@ return _M
 *启用的方法不再累述，参考上面*
 
 ### 创建一个GlobalRule对象
-```bash
+```shell
 curl -X PUT \
   https://{apisix_listen_address}/apisix/admin/global_rules/1 \
   -H 'Content-Type: application/json' \
