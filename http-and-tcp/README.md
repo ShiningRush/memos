@@ -15,6 +15,11 @@
 
 `Nginx`设置长连接可以参考：[Nginx Upsteam](http://nginx.org/en/docs/http/ngx_http_upstream_module.html#keepalive) 以及 [支持keep alive长连接](https://skyao.gitbooks.io/learning-nginx/content/documentation/keep_alive.html)
 
+值得注意的是，`Nginx`的`keepalive_requests`要和`keepalive`一起使用才会有效果。
+
+`keepalive_requests`指当长连接被使用多少次之后就会释放该连接，按照官方文档说法，周期性地释放连接是必要的，这样才可以释放每个连接所申请的内存。
+`keepalive`指保持多少空闲连接在缓存中。
+
 ## Socket连接
 可以由一个五元组来定义`[ 源IP, 源端口, 目的IP, 目的端口, 类型：TCP or UDP ]`，每个连接在 `Unix` 中会占用一个文件描述符(`FD`)
 
