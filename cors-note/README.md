@@ -12,3 +12,4 @@ CORS是一种为了解决跨域请求而诞生的规范，详细规范参见 [MD
   - Chromium (starting in v76) caps at 2 hours (7200 seconds).
   - Chromium also specifies a default value of 5 seconds.
   - A value of -1 will disable caching, requiring a preflight OPTIONS check for all calls.
+- 当 `Access-Control-Allow-Origin` 不为 `*` 或者 `静态Origin` 时，比如可以根据访问方的 `Origin` 头部进行动态返回时，要注意设置 `Vary: Origin` 这样浏览器才不会缓存上一次的 `CORS` 返回头，也不会引起 `缓存中毒` 的安全隐患，缓存中毒，指攻击利用浏览器根据 url 缓存返回结果的特性，从自己的攻击站点发起 `XSS` 攻击，此时浏览器将会直接使用上一次的跨域请求回复，而通过攻击者的请求。

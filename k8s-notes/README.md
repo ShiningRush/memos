@@ -27,10 +27,14 @@
 
 
 ## 杂项
-- ServiceAccount 已器用，ServiceAccountName 是最新项
+- ServiceAccount 已弃用，ServiceAccountName 是最新项
 - 每个 ServiceAccount 创建时都会自动生成一个 ServiceAccoutSecret，并且挂载到使用了 ServiceAccount 的 Pod 中
 - 可以使用以下命令查看容器中的网络
 ```
 docker inspect -f {{.State.Pid}}    容器id   # 获取容器的pid
 nsenter -n -t pid   # 进入容器网络空间
+```
+简写为
+```
+nsenter -n -t $(docker inspect -f {{.State.Pid}} dockerid)
 ```

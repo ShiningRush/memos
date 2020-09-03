@@ -21,3 +21,6 @@ Prometheus 以每两个小时为一个块，存储到磁盘中，内存保存近
 - 我们使用 rate 来查看某个数据在较长一段时间内的变化趋势，它会消除一些细节防止影响趋势的展示
 - 使用 irate 来查看某个数据在一段时间内的细小抖动和完整的变化。
 - 使用 rate 时尽量选择较长的时间，而 irate 则反之（太长会丢失很多变化）
+
+## relabel_config vs metric_relabel_configs
+`relabel_config` 发生在 `metric_relabel_configs`，通常用于挑选 target 
