@@ -54,7 +54,53 @@ sequence
 `keepalive_requests`指当长连接被使用多少次之后就会释放该连接，按照官方文档说法，周期性地释放连接是必要的，这样才可以释放每个连接所申请的内存。
 `keepalive`指保持多少空闲连接在缓存中。
 
+## SYN_RECV 状态
+当 Client 发送了 SYN 包，SEVER 端回复 ACK 则会进入该状态。
+目前，Linux下默认会进行5次重发SYN-ACK包，重试的间隔时间从1s开始，下次的重试间隔时间是前一次的双倍，5次的重试时间间隔为1s, 2s, 4s, 8s, 16s，总共31s，第5次发出后还要等32s都知道第5次也超时了，所以，总共需要 1s + 2s + 4s+ 8s+ 16s + 32s = 63s，TCP才会把断开这个连接。由于，SYN超时需要63秒，那么就给攻击者一个攻击服务器的机会，攻击者在短时间内发送大量的SYN包给Server(俗称 SYN flood 攻击)，用于耗尽Server的SYN队列。对于应对SYN 过多的问题，linux提供了几个TCP参数：tcp_syncookies、tcp_synack_retries、tcp_max_syn_backlog、tcp_abort_on_overflow 来调整应对。
+
 ## Socket连接
 可以由一个五元组来定义`[ 源IP, 源端口, 目的IP, 目的端口, 类型：TCP or UDP ]`，每个连接在 `Unix` 中会占用一个文件描述符(`FD`)
 
 关于`TIME_WAIT`更详细的内容可以参考：[系统调优你所不知道的TIME_WAIT和CLOSE_WAIT](https://zhuanlan.zhihu.com/p/40013724)
+
+## LVS(IPVS) 的长连接问题
+查看 Linux 保活时间
+```
+sysctl -a | grep keep
+net.ipv4.tcp_keepalive_intvl = 75  # 长连接探测包的间隔(s)
+net.ipv4.tcp_keepalive_probes = 9  # 判断为失败的次数
+net.ipv4.tcp_keepalive_time = 7200 # 空闲多少秒之后开始进行探测
+```
+值得一提的是KeepAlive并不是 TCP 规范的一部分，但是基本上操作系统都实现了它。但是光操作系统层面的设置其实对于应用层来说是不够的：
+- 这几个配置都在内核参数中，配置繁琐
+- 系统层面的可用其实不代表物理层面的可用，有的 ESTABLISHED 连接其实已经不可用了，但是应用层感知不到
+
+为了解决这些问题，很多框架和库都在应用实现了自己的保活机制( KeepAlive )，本质上与系统的机制类似，也是通过心跳包来探测连接是否可用。
+
+当使用 LVS 作为四层代理时，如果Linux 的TCP 保活时间高于 LVS 保活时间，那么在LVS主动断开连接后，Linux却不知道连接已断开，这时候去 read 该连接会得到一个 `Connection reset by peer` 错误，write 会产生 RST 消息，如果继续 write 会产生 `broken pipe` 的错误。
+
+查看 lvs 保活时间
+```
+ipvsadm --list --timeout
+```
+查看 lvs 连接
+```
+ipvsadm -lnc
+```
+
+这里有一个关于 Mysql 的 [典型超时问题](https://github.com/go-sql-driver/mysql/issues/257)
+推测是 Mysqld 主动切断客户端连接，但是客户端却没有感知到。
+
+## TCP连接超时问题
+通常多数 TCP 连接都会依赖 OS 的默认超时时间，那么 OS 的默认超时时间时多少呢，使用以下命令能查看 TCP 重试相关的次数，而每次重试都是上一次重试时间的一倍，即遵从`1s 2s 4s` 这样的规律。
+```
+sysctl -a | grep retries
+```
+
+## http 协议: 100-Continue
+当 client 需要在 body 放入数据时，有时候数据较大，需要检查服务端是否接受，可以采用使用该协议。
+客户端可以在请求头部携带头部 `Expect: 100-continue`，curl 命令在 body 大于 1024 会自动携带该头部。
+
+注意以下几点：
+- 由于 Server 端不一定会正确处理 100 协议，因此 client 应该在指定的 timeout 之后立即发送body
+- Server 接受到 Expect 请求应该先响应 StatusCode 100 再继续读取请求体

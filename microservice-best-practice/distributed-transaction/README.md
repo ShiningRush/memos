@@ -27,12 +27,13 @@ TCC 相当于 3PC 的完善，除了超时机制外，还存在 `cancel` 步骤�
 
 ## Saga
 Saga 是一种长活事务的设计模式( Long-live transaction )，它基于 1978 年的一篇论文，主要有两种实现：Events/Choreography or Command/Orchestration
-可以参考：[saga-pattern-implement-business-transactions-using-microservices-part](https://blog.couchbase.com/saga-pattern-implement-business-transactions-using-microservices-part/)。
+可以参考：[saga-pattern-implement-business-transactions-using-microservices-part](https://blog.couchbase.com/saga-pattern-implement-business-transactions-using-microservices-part/)、
+[saga](https://docs.microsoft.com/en-us/azure/architecture/。reference-architectures/saga/saga)。
 
 这里说一些需要注意的点：
 - `Choreography` 与 `Orchestration` 都有编排的意思，但是前者是不需要 `协调器(Orchestrator)` 的角色，都是参与者通过 `事件` 相互协作。参考 [choreography-vs-orchestration](https://medium.com/ingeniouslysimple/choreography-vs-orchestration-a6f21cfaccae)
 - 微软的 [基于容器化的微服务架构设计](https://docs.microsoft.com/zh-cn/dotnet/architecture/microservices/architect-microservice-container-applications/asynchronous-message-based-communication) 极力推荐服务间通过异步消息来通信，其实就是 `Events/Choreography` 模式的实现。
-- `Command/Orchestration` 模式可以将 `协调器` 角色集成到调用者服务中，也可以共用一个 `中心协调器`，一般更推荐前一种模式，除非业务中存在大量类似需求。
+- `Command/Orchestration` 模式可以将 `协调器` 角色集成到调用者服务中，也可以共用一个 `中心协调器`，一般更推荐前一种模式，除非业务中存在大量类似需求。两者都需要注意多个实例时可能会存在多次执行的问题，所以一般都会涉及选主操作。
 - `Command/Orchestration` 模式下如果将 `协调器` 集中到调用者服务时，需要考虑多个副本间的竞争关系。如果使用 `k8s` 集群，可以通过 `Sidecar` 方式来进行 Leader选举 从而轻松解决竞争问题，参考 [contrib/election](https://github.com/kubernetes-retired/contrib/tree/master/election)。
 - `Events/Choreography` 应该作为系统首选方案，只有事务涉及服务太多( > 4 )的情况再考虑 `Command/Orchestration`。
 - `Events/Choreography` 要注意推送事件失败时的重试与补偿机制，需要的情况下可以使用 `本地消息表` 模式

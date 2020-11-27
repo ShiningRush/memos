@@ -38,3 +38,12 @@ nsenter -n -t pid   # 进入容器网络空间
 ```
 nsenter -n -t $(docker inspect -f {{.State.Pid}} dockerid)
 ```
+
+
+## 网络模型
+k8s 对网络提出了三个基本要求
+- pods on a node can communicate with all pods on all nodes without NAT ( 节点上的 POD 不需要通过 NAT 就可以与其他任意节点的 POD 通信 )
+- agents on a node (e.g. system daemons, kubelet) can communicate with all pods on that node (节点上的代理程序可以与该节点上的任意 POD 通信 )
+
+下面的这个要求仅针对支持 `HostNetwork` 模式的平台，如 linux
+- pods in the host network of a node can communicate with all pods on all nodes without NAT ( 节点上的 hostnetwork POD 不需要通过 NAT 就可以与其他任意节点的 POD 通信 ) 
