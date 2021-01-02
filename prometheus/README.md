@@ -12,7 +12,7 @@ Prometheus 以每两个小时为一个块，存储到磁盘中，内存保存近
 参考[Remote write tuning](https://prometheus.io/docs/practices/remote_write/)
 
 ## rate vs irate
-两者的决定性差别在于:
+它们都用于计算一个时间区间内指标的每秒变化率，两者的决定性差别在于:
 - rate 使用整个时间区间所有点计算出平均变化速率，它会削平峰值
 - irate 使用时间区间内最后的两个数据点作为变化速率
 

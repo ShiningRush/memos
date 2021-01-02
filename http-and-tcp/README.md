@@ -104,3 +104,12 @@ sysctl -a | grep retries
 注意以下几点：
 - 由于 Server 端不一定会正确处理 100 协议，因此 client 应该在指定的 timeout 之后立即发送body
 - Server 接受到 Expect 请求应该先响应 StatusCode 100 再继续读取请求体
+
+## http samesite 限制
+在chrome 51 之后为了限制 CSRF 攻击，限制跨站 cookie 的访问，如果目标站点设置的 Cookie 没有指定 `SameSite` 会被认为成 `Lax`
+`SameSite` 分为三个等级：
+- None: 不限制
+- Lax: Cookies允许与顶级导航一起发送，并将与第三方网站发起的GET请求一起发送。这是浏览器中的默认值。
+- Strict: Cookies只会在第一方上下文中发送，不会与第三方网站发起的请求一起发送。
+
+## 

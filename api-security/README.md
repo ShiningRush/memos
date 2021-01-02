@@ -25,10 +25,12 @@
 
 常见对称加密算法：AES, DES
 常见非对称加密算法：RSA，ECC
-常见哈希算法：MD5，SHA-1，HAMC, FNV, Murmur, DJB
+常见哈希算法：MD5，SHA-1，HAMC, FNV, Murmur, DJB, CRC
 参考 [Hash](https://github.com/dgryski/dgohash)
 
 以上算法复杂度与安全度成反比，顺序按照算法复杂度由低到高。
+如果需要一個快速的 Hash 算法，目前已知最快：murmur > crs > md4 > md5
+参考 [Fastest hash for non-cryptographic uses?](https://stackoverflow.com/questions/3665247/fastest-hash-for-non-cryptographic-uses)
 
 ### RSA 密钥格式
 RSA 密钥格式有两种：pem, der

@@ -18,3 +18,28 @@ OAuth2.0 协议是针对授权流程的标准协议，不包括验证，OIDC 是
 - 无浏览器设备，不过这个部分目前 OAuth 正在起草一个新的流程来补全
 
 关于现在应用的 OAuth 实践，[点击这里](https://www.ory.sh/oauth2-for-mobile-app-spa-browser/)
+
+## Hydra
+[hydra](https://github.com/ory/hydra) 是一个实现 OAuth2.0 的开源项目，它抽象了认证规范，将授权和认证实现解耦，非常不错。它属于一个开源组织 `Ory`，它下面还有几个和鉴权相关的项目。
+这里简单介绍下一些要点
+- 容器默认监听 4444 和 4445 端口，一个 public ，一个 admin，public 用于暴露 OAuth2 协议约定的标准端点，admin 用于管理 Hyrdra，更多细节可以查看 [API文档](https://www.ory.sh/hydra/docs/reference/api)
+- 使用前先查看下项目的一些 [限制条件](https://www.ory.sh/hydra/docs/limitations)，最关键的一点应该是要求 Mysql版本必须为 >= 5.7 ，或者使用MariaDB
+- 配置可以使用 [配置文件](https://www.ory.sh/hydra/docs/reference/configuration) 或者环境变量，常见命令如下
+```
+// 命令行参数
+-c path/to/config.yaml or --config path/to/config.yaml
+--dangerous-force-http // 允许 RedirectURI 为 http，还需要配合 dangerous-allow-insecure-redirect-urls 来使用
+--dangerous-allow-insecure-redirect-urls=http://vincixutest.woa.com/auth/accept,http://scrtest.ied.com/auth/accept
+
+// 环境变量
+SECRETS_SYSTEM=$SECRETS_SYSTEM -- 配置系统密钥，用于加密
+DSN=$DSN -- 数据链接
+URLS_SELF_ISSUER=https://localhost:9000/ -- Hydra 部署的Origin，用于签发Issuer
+URLS_CONSENT=https://localhost:9001/ -- 实现认证规范的确认授权端点
+URLS_LOGIN=https://localhost:9001/ -- 实现认证规范的登录端点
+```
+- 执行数据库迁移，Hydra 维护了一个数据库的版本管理功能，集成在同一个二进制内，可以使用以下的命令开启数据库迁移
+```bash
+hydra migrate sql --yes $DSN
+```
+
