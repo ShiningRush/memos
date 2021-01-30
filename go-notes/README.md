@@ -107,3 +107,20 @@ aChan <- nil
 ```
 
 使用信号的方式非常优雅，但是性能损耗比后者慢了50%
+
+## 静态库
+当你对一个 `package` 不是 main 的 go文件进行编译时，会得到一个 pkg 的归档文件 `x.a`，它可以提供给其他go引用，但是看不见声明与源码 
+
+## 失败重试
+常见的失败重试机制：
+- 固定时间 (FixedDelay)
+- 指数退避算法( Exponential Backoff )
+
+这里简单介绍指数退避算法，即每次失败重试后，延迟的时间倍增，等待的时间为 2^n + `random_number_milliseconds`，比如：
+失败第一次后，等待 1 + `random_number_milliseconds`
+失败第二次后，等待 2 + `random_number_milliseconds`
+失败第三次后，等待 3 + `random_number_milliseconds`
+
+这里之所有会有一个随机的毫秒数，是为了防止通信双方如果在失败都尝试按照指数倍增的方式去重传，那么有可能会一直冲突，所以补充了一个随机值。
+
+go 有个代码结构非常不错的重试库：[retry-go](https://github.com/avast/retry-go)

@@ -24,3 +24,34 @@ Prometheus 以每两个小时为一个块，存储到磁盘中，内存保存近
 
 ## relabel_config vs metric_relabel_configs
 `relabel_config` 发生在 `metric_relabel_configs`，通常用于挑选 target 
+
+## 如何处理prometheus 的返回结果
+promehtues的返回结果是异构的，类似 `[1610589855,  "11.778672386876817"]`，除了定义异构结构体外，看了下 client 的代码，原来使用了如下的方式实现：
+```go
+// SamplePair pairs a SampleValue with a Timestamp.
+type SamplePair struct {
+	Timestamp Time
+	Value     SampleValue
+}
+
+// MarshalJSON implements json.Marshaler.
+func (s SamplePair) MarshalJSON() ([]byte, error) {
+	t, err := json.Marshal(s.Timestamp)
+	if err != nil {
+		return nil, err
+	}
+	v, err := json.Marshal(s.Value)
+	if err != nil {
+		return nil, err
+	}
+	return []byte(fmt.Sprintf("[%s,%s]", t, v)), nil
+}
+
+// UnmarshalJSON implements json.Unmarshaler.
+func (s *SamplePair) UnmarshalJSON(b []byte) error {
+	v := [...]json.Unmarshaler{&s.Timestamp, &s.Value}
+	return json.Unmarshal(b, &v)
+}
+```
+
+它将两个字段重组成了一个 `json.Unmarshaler` 数组，然后用它来接受结果集。
