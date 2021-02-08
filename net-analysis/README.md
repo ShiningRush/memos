@@ -29,7 +29,7 @@ NAT 常用于虚拟化技术中，又分为三类
 - TIME: 时间戳
 - SRC: 源头
 - DST: 目标地址
-- Flags: 表示 TCP 数据包的标志位，S-SYN, .-ACK, S.-SYN+ACK, P.Push+ACK, R-RST 连接重置, 
+- Flags: 表示 TCP 数据包的标志位，F-FIN, S-SYN, .-ACK, S.-SYN+ACK, P.Push+ACK, R-RST 连接重置, 
 - data-seq: 数据序列号，包括起始以及结束
 - ack-seq: 已接受的序列号表示期望从其之后开始，
 - win: 滑动窗口的缓存大小
